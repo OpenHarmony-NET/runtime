@@ -722,6 +722,8 @@ if(CLR_CMAKE_TARGET_UNIX)
     add_compile_definitions($<$<NOT:$<BOOL:$<TARGET_PROPERTY:IGNORE_DEFAULT_TARGET_OS>>>:TARGET_LINUX>)
     if(CLR_CMAKE_TARGET_LINUX_MUSL)
         add_compile_definitions($<$<NOT:$<BOOL:$<TARGET_PROPERTY:IGNORE_DEFAULT_TARGET_OS>>>:TARGET_LINUX_MUSL>)
+        # 为OpenHarmony平台做的临时修改
+        add_compile_definitions($<$<NOT:$<BOOL:$<TARGET_PROPERTY:IGNORE_DEFAULT_TARGET_OS>>>:TARGET_OPENHARMONY>)
     endif()
   elseif(CLR_CMAKE_TARGET_NETBSD)
     add_compile_definitions($<$<NOT:$<BOOL:$<TARGET_PROPERTY:IGNORE_DEFAULT_TARGET_OS>>>:TARGET_NETBSD>)

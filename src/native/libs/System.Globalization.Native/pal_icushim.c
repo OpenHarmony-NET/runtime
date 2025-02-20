@@ -506,6 +506,9 @@ int32_t GlobalizationNative_LoadICU(void)
 #if defined(ANDROID_FORCE_ICU_DATA_DIR)
     setenv ("ICU_DATA", "/system/usr/icu/", 0);
 #endif
+#ifdef TARGET_OPENHARMONY
+    setenv ("ICU_DATA", "/system/usr/ohos_icu", 0);
+#endif
     FOR_ALL_ICU_FUNCTIONS
     ValidateICUDataCanLoad();
 

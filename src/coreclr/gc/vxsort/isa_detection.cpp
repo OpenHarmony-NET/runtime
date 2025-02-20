@@ -84,6 +84,9 @@ SupportedISA DetermineSupportedISA()
 
 SupportedISA DetermineSupportedISA()
 {
+#ifdef TARGET_OPENHARMONY
+    return SupportedISA::None;
+#else
     __builtin_cpu_init();
     if (__builtin_cpu_supports("avx2"))
     {
@@ -96,6 +99,7 @@ SupportedISA DetermineSupportedISA()
     {
         return SupportedISA::None;
     }
+#endif
 }
 
 #endif // defined(TARGET_UNIX)
