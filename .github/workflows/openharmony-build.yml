@@ -1,0 +1,28 @@
+name: OpenHarmony Build
+
+on:
+  push:
+    branches:
+      - 'oh_**'
+  pull_request:
+    branches:
+      - 'oh_**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker
+      uses: docker/setup-buildx-action@v2
+
+    - name: Build using Docker
+      run: |
+        docker run --rm \
+          -v ${{ github.workspace }}:/workspace \
+          -w /workspace \
+          ubuntu:20.04 \
+          bash -c "apt-get update && apt-get install -y bash && ./build-openharmony-x64.sh"
