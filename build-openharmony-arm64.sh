@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-sudo docker run --rm \
+docker run --rm \
     -v ./:/runtime \
     -w /runtime \
     -e ROOTFS_DIR="/crossrootfs/arm64" \
