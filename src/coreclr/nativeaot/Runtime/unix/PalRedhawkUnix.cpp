@@ -57,6 +57,11 @@
 
 #ifdef TARGET_APPLE
 #include <mach/mach.h>
+#elif defined(TARGET_LINUX)
+#include <unistd.h>
+#include <sys/mman.h>
+#include <string.h>
+#include <stdint.h>
 #endif
 
 using std::nullptr_t;
@@ -567,6 +572,45 @@ REDHAWK_PALEXPORT UInt32_BOOL REDHAWK_PALAPI PalAllocateThunksFromTemplate(HANDL
     *newThunksOut = (void*)addr;
 
     return UInt32_TRUE;
+#elif defined(TARGET_LINUX)
+    if (templateSize == 0)
+    {
+        return UInt32_FALSE;
+    }
+
+    long pageSize = sysconf(_SC_PAGESIZE);
+    if (pageSize == -1)
+    {
+        return UInt32_FALSE;
+    }
+
+    // Align templateSize to page boundary
+    size_t alignedSize = (templateSize + (size_t)pageSize - 1) & ~((size_t)pageSize - 1);
+    if (alignedSize > SIZE_MAX / 2)
+    {
+        return UInt32_FALSE; // Prevent overflow
+    }
+
+    size_t totalSize = 2 * alignedSize;
+    void* allocation = mmap(NULL, totalSize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (allocation == MAP_FAILED)
+    {
+        return UInt32_FALSE;
+    }
+
+    // Copy template code to the first block
+    const void* templateSrc = (const void*)((uintptr_t)hTemplateModule + templateRva);
+    memcpy(allocation, templateSrc, templateSize);
+    __builtin___clear_cache((char*)allocation, (char*)allocation + templateSize);
+    // Set first block to RX permissions
+    if (mprotect(allocation, alignedSize, PROT_READ | PROT_EXEC) == -1)
+    {
+        munmap(allocation, totalSize);
+        return UInt32_FALSE;
+    }
+    __builtin___clear_cache((char*)allocation, (char*)allocation + templateSize);
+    *newThunksOut = allocation;
+    return UInt32_TRUE;
 #else
     PORTABILITY_ASSERT("UNIXTODO: Implement this function");
 #endif
@@ -583,6 +627,34 @@ REDHAWK_PALEXPORT UInt32_BOOL REDHAWK_PALAPI PalFreeThunksFromTemplate(void *pBa
     } while (ret == KERN_ABORTED);
 
     return ret == KERN_SUCCESS ? UInt32_TRUE : UInt32_FALSE;
+#elif defined(TARGET_LINUX)
+    if (pBaseAddress == NULL || templateSize == 0) {
+        return UInt32_FALSE;
+    }
+
+    // 获取系统页面大小
+    long pageSize = sysconf(_SC_PAGESIZE);
+    if (pageSize == -1) {
+        return UInt32_FALSE;
+    }
+
+    // 计算对齐后的内存大小（与分配时相同的计算方式）
+    size_t alignedSize = (templateSize + (size_t)pageSize - 1) & ~((size_t)pageSize - 1);
+
+    // 防止整数溢出
+    if (alignedSize > SIZE_MAX / 2) {
+        return UInt32_FALSE;
+    }
+
+    // 计算实际分配的总内存大小（2倍对齐大小）
+    size_t totalSize = 2 * alignedSize;
+
+    // 释放内存
+    if (munmap(pBaseAddress, totalSize) == -1) {
+        return UInt32_FALSE;
+    }
+
+    return UInt32_TRUE;
 #else
     PORTABILITY_ASSERT("UNIXTODO: Implement this function");
 #endif
