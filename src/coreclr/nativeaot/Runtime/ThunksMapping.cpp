@@ -359,7 +359,7 @@ EXTERN_C void* QCALLTYPE RhAllocateThunksMapping()
     int thunkBlockSize = RhpGetThunkBlockSize();
     int templateSize = thunkBlocksPerMapping * thunkBlockSize;
 
-#ifndef TARGET_APPLE // Apple platforms cannot use the initial template
+#ifndef TARGET_APPLE || TARGET_LINUX // Apple platforms cannot use the initial template
     if (pThunksTemplateAddress == NULL)
     {
         // First, we use the thunks directly from the thunks template sections in the module until all
@@ -377,8 +377,9 @@ EXTERN_C void* QCALLTYPE RhAllocateThunksMapping()
         uint8_t* pModuleBase = (uint8_t*)PalGetModuleHandleFromPointer(RhpGetThunksBase());
         int templateRva = (int)((uint8_t*)RhpGetThunksBase() - pModuleBase);
 
-        if (!PalAllocateThunksFromTemplate((HANDLE)pModuleBase, templateRva, templateSize, &pThunkMap))
+        if (!PalAllocateThunksFromTemplate((HANDLE)pModuleBase, templateRva, templateSize, &pThunkMap)){
             return NULL;
+        }
     }
 
     if (!PalMarkThunksAsValidCallTargets(
