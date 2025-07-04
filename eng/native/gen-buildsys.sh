@@ -106,6 +106,12 @@ if [[ "$host_arch" == "wasm" ]]; then
     fi
 fi
 
+if [[ "$target_os" == "openharmony" ]]; then
+    echo "openharmony"
+    cmake_extra_defines="$cmake_extra_defines -DCLR_CMAKE_TARGET_OS=openharmony"
+fi
+
+DCMAKE_TOOLCHAIN_FILE
 $cmake_command \
   --no-warn-unused-cli \
   -G "$generator" \

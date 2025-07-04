@@ -57,7 +57,7 @@
 
 #ifdef TARGET_APPLE
 #include <mach/mach.h>
-#elif defined(TARGET_LINUX)
+#elif defined(TARGET_OPENHARMONY)
 #include <unistd.h>
 #include <sys/mman.h>
 #include <string.h>
@@ -572,7 +572,7 @@ REDHAWK_PALEXPORT UInt32_BOOL REDHAWK_PALAPI PalAllocateThunksFromTemplate(HANDL
     *newThunksOut = (void*)addr;
 
     return UInt32_TRUE;
-#elif defined(TARGET_LINUX)
+#elif defined(TARGET_OPENHARMONY)
     if (templateSize == 0)
     {
         return UInt32_FALSE;
@@ -627,7 +627,7 @@ REDHAWK_PALEXPORT UInt32_BOOL REDHAWK_PALAPI PalFreeThunksFromTemplate(void *pBa
     } while (ret == KERN_ABORTED);
 
     return ret == KERN_SUCCESS ? UInt32_TRUE : UInt32_FALSE;
-#elif defined(TARGET_LINUX)
+#elif defined(TARGET_OPENHARMONY)
     if (pBaseAddress == NULL || templateSize == 0) {
         return UInt32_FALSE;
     }

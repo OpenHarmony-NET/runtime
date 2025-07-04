@@ -54,7 +54,6 @@ static int GetNodeNum(const char* path, bool firstOnly)
 void NUMASupportInitialize()
 {
 #if defined(TARGET_LINUX) && !defined(TARGET_OPENHARMONY)
-111
     if (syscall(__NR_get_mempolicy, NULL, NULL, 0, 0, 0) < 0 && errno == ENOSYS)
         return;
 

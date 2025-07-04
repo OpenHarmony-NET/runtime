@@ -12,7 +12,10 @@
 
 #define THUNKS_MAP_SIZE 0x8000
 
-#ifdef TARGET_LINUX
+#ifdef TARGET_APPLE
+#define PAGE_SIZE 0x4000
+#define PAGE_SIZE_LOG2 14
+#elif TARGET_OPENHARMONY
 #define PAGE_SIZE 0x1000
 #define PAGE_SIZE_LOG2 12
 #else
@@ -20,9 +23,15 @@
 #endif
 
 // THUNK_POOL_NUM_THUNKS_PER_PAGE = min(PAGE_SIZE / THUNK_CODESIZE, (PAGE_SIZE - POINTER_SIZE) / THUNK_DATASIZE)
+#ifdef TARGET_APPLE
+#define THUNK_POOL_NUM_THUNKS_PER_PAGE 0x3ff
+#elif TARGET_OPENHARMONY
 #define THUNK_POOL_NUM_THUNKS_PER_PAGE 0xFF
+#else
+#error Unsupported OS
+#endif
 
-#ifdef TARGET_LINUX
+//;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Thunk Pages ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 .macro THUNKS_PAGE_BLOCK
     IN_PAGE_INDEX = 0
@@ -45,6 +54,17 @@
     .endr
 .endm
 
+#ifdef TARGET_APPLE
+// Thunk pool
+    .text
+    .p2align PAGE_SIZE_LOG2
+PATCH_LABEL ThunkPool
+    .rept (THUNKS_MAP_SIZE / PAGE_SIZE)
+    .p2align PAGE_SIZE_LOG2
+    THUNKS_PAGE_BLOCK
+    .endr
+    .p2align PAGE_SIZE_LOG2
+#elif TARGET_OPENHARMONY
 // Thunk pool
     .section .thunks ,"ax"
     .p2align PAGE_SIZE_LOG2
@@ -67,8 +87,13 @@ PATCH_LABEL ThunkPool
 //
 LEAF_ENTRY RhpGetThunksBase
     // Return the address of the first thunk pool to the caller (this is really the base address)
+#ifdef TARGET_APPLE
+    adrp     x0, C_FUNC(ThunkPool)@PAGE
+    add      x0, x0, C_FUNC(ThunkPool)@PAGEOFF
+#elif TARGET_OPENHARMONY
     adrp     x0, C_FUNC(ThunkPool)
     add      x0, x0, #:lo12:C_FUNC(ThunkPool)
+#endif
     ret
 LEAF_END RhpGetThunksBase
 

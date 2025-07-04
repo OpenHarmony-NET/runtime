@@ -476,6 +476,23 @@
         "#import": [
           "win"
         ]
+      },
+      "openharmony": {
+        "#import": [
+          "linux-musl"
+        ]
+      },
+      "openharmony-arm64": {
+        "#import": [
+          "openharmony",
+          "linux-musl-arm64"
+        ]
+      },
+      "openharmony-x64": {
+        "#import": [
+          "openharmony",
+          "linux-musl-x64"
+        ]
       }
     }
   }

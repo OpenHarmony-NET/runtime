@@ -9,6 +9,9 @@ set(PRERELEASE 0)
 #     - for non-windows build platform & architecture is detected using inbuilt CMAKE variables and cross target component configure
 #     - for windows we use the passed in parameter to CMAKE to determine build arch
 #----------------------------------------
+
+message("CLR_CMAKE_TARGET_OS${CLR_CMAKE_TARGET_OS}")
+
 set(CLR_CMAKE_HOST_OS ${CMAKE_SYSTEM_NAME})
 string(TOLOWER ${CLR_CMAKE_HOST_OS} CLR_CMAKE_HOST_OS)
 if(CLR_CMAKE_HOST_OS STREQUAL linux)
@@ -229,6 +232,13 @@ endif(CLR_CMAKE_HOST_OS STREQUAL emscripten)
 if(CLR_CMAKE_TARGET_OS STREQUAL wasi)
     set(CLR_CMAKE_HOST_WASI 1)
 endif(CLR_CMAKE_TARGET_OS STREQUAL wasi)
+
+if(CLR_CMAKE_TARGET_OS STREQUAL openharmony)
+    set(CLR_CMAKE_TARGET_UNIX 1)
+    set(CLR_CMAKE_TARGET_LINUX 1)
+    set(CLR_CMAKE_TARGET_LINUX_MUSL 1)
+    set(CLR_CMAKE_TARGET_OPENHARMONY 1)
+endif(CLR_CMAKE_TARGET_OS STREQUAL openharmony)
 
 #--------------------------------------------
 # This repo builds two set of binaries
@@ -471,7 +481,7 @@ if(CLR_CMAKE_TARGET_OS STREQUAL windows)
 endif()
 
 # check if host & target os/arch combination are valid
-if (NOT (CLR_CMAKE_TARGET_OS STREQUAL CLR_CMAKE_HOST_OS) AND NOT CLR_CMAKE_TARGET_WASI)
+if (NOT (CLR_CMAKE_TARGET_OS STREQUAL CLR_CMAKE_HOST_OS) AND NOT CLR_CMAKE_TARGET_WASI AND NOT CLR_CMAKE_TARGET_OPENHARMONY)
     if(NOT (CLR_CMAKE_HOST_OS STREQUAL windows))
         message(FATAL_ERROR "Invalid host and target os/arch combination. Host OS: ${CLR_CMAKE_HOST_OS}")
     endif()

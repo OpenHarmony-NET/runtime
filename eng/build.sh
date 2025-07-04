@@ -298,6 +298,10 @@ while [[ $# > 0 ]]; do
           ;;
         haiku)
           os="haiku" ;;
+        openharmony)
+          os="openharmony"
+          __PortableTargetOS=linux-musl
+          ;;
         *)
           echo "Unsupported target OS '$2'."
           echo "Try 'build.sh --help' for values supported by '--os'."
